@@ -817,6 +817,22 @@ function cargar(){
     else if(e.phase === 'warmup' || e.phase === 'abs' || e.phase === 'cooldown') e.type = 'reps';
     else e.type = 'weight';
   }));
+  /* ---- Normaliza las sesiones heredadas de GymTrack ----
+     La app antigua guardaba la duración en MILISEGUNDOS y el nombre en routineName.
+     Esta corrección es idempotente: una vez convertida, ya no se vuelve a tocar. */
+  DB.sessions = (DB.sessions || []).map(s => {
+    const o = Object.assign({}, s);
+    if(!o.name) o.name = o.routineName || (rutina(o.routineId) || {}).name || 'Sesión';
+    if(typeof o.duration === 'number'){
+      if(o.duration > 300) o.duration = Math.max(1, Math.round(o.duration/60000));  // venía en ms
+      else o.duration = Math.round(o.duration);
+    }
+    if(o.series == null && typeof o.done === 'number') o.series = o.done;
+    if(o.seriesTotal == null && typeof o.total === 'number') o.seriesTotal = o.total;
+    delete o.routineName; delete o.done; delete o.skipped; delete o.total;
+    return o;
+  });
+
   if(!DB.nutri) DB.nutri = { semanas:{}, medidas:[] };
   if(!DB.nutri.medidas) DB.nutri.medidas = [];
   if(!DB.done) DB.done = {};

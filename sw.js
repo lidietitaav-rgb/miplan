@@ -1,4 +1,4 @@
-const CACHE = 'miplan-v2';
+const CACHE = 'miplan-v3';
 const ASSETS = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => {
